@@ -27,47 +27,6 @@ end
 
 include_recipe "java"
 
-group node['neo4j']['server_group']
-
-user node['neo4j']['server_user'] do
-    home node['neo4j']['server_path']
-    comment "service user for neo4j-server"
-    gid node['neo4j']['server_group']
-end
-
-root_dirs = [
-  node['neo4j']['server_path'],
-  node['neo4j']['server_bin'],
-  node['neo4j']['server_etc']
-]
-
-root_dirs.each do |dir|
-  directory dir do
-    owner "root"
-    group "root"
-    mode "0755"
-    action :create
-    recursive true
-  end
-end
-
-user_dirs = [
-  node['neo4j']['server_data'],
-  node['neo4j']['server_ssl'],
-  node['neo4j']['server_lock'],
-  node['neo4j']['server_logs']
-]
-
-user_dirs.each do |dir|
-  directory dir do
-    owner node['neo4j']['server_user']
-    group node['neo4j']['server_group']
-    mode "0755"
-    action :create
-    recursive true
-  end
-end
-
 unless FileTest.exists?("#{node['neo4j']['server_bin']}/neo4j")
   remote_file "#{Chef::Config[:file_cache_path]}/#{node['neo4j']['server_file']['enterprise']}" do
     source node['neo4j']['server_download']['enterprise']
@@ -80,14 +39,14 @@ unless FileTest.exists?("#{node['neo4j']['server_bin']}/neo4j")
     command <<-EOF
       tar -zxf #{node['neo4j']['server_file']['enterprise']}
       chown -R root:root neo4j-enterprise-#{node['neo4j']['server_version']}
-      mv neo4j-enterprise-#{node['neo4j']['server_version']} #{node['neo4j']['server_path']}
+      mv -f neo4j-enterprise-#{node['neo4j']['server_version']} #{node['neo4j']['server_path']}
     EOF
     action :run
   end
 end
 
 link "/etc/init.d/neo4j-service" do
-  to "#{node['neo4j']['server_bin']}/neo4j"
+  to "#{node['neo4j']['server_path']}/bin/neo4j"
 end
 
 execute "setting the systems ulimits" do 

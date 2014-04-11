@@ -22,8 +22,10 @@
 
 default['neo4j']['project_url'] = "http://dist.neo4j.org"
 default['neo4j']['server_version'] = "1.8.M06"
-default['neo4j']['server_file'] = "neo4j-community-#{node['neo4j']['server_version']}-unix.tar.gz"
-default['neo4j']['server_download'] = "#{node['neo4j']['project_url']}/#{node['neo4j']['server_file']}"
+default['neo4j']['server_file']['community'] = "neo4j-community-#{node['neo4j']['server_version']}-unix.tar.gz"
+default['neo4j']['server_file']['enterprise'] = "neo4j-enterprise-#{node['neo4j']['server_version']}-unix.tar.gz"
+default['neo4j']['server_download']['community'] = "#{node['neo4j']['project_url']}/#{node['neo4j']['server_file']['community']}"
+default['neo4j']['server_download']['enterprise'] = "#{node['neo4j']['project_url']}/#{node['neo4j']['server_file']['enterprise']}"
 
 default['neo4j']['server_path'] = "/usr/share/neo4j"
 default['neo4j']['server_bin'] = "#{node['neo4j']['server_path']}/bin"

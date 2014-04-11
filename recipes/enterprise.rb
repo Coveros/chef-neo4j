@@ -46,6 +46,8 @@ root_dirs.each do |dir|
     owner "root"
     group "root"
     mode "0755"
+    action :create
+    recursive true
   end
 end
 
@@ -61,12 +63,14 @@ user_dirs.each do |dir|
     owner node['neo4j']['server_user']
     group node['neo4j']['server_group']
     mode "0755"
+    action :create
+    recursive true
   end
 end
 
 unless FileTest.exists?("#{node['neo4j']['server_bin']}/neo4j")
   remote_file "#{Chef::Config[:file_cache_path]}/#{node['neo4j']['server_file']}" do
-    source node['neo4j']['server_download']
+    source node['neo4j']['server_download']['enterprise']
   end
 
   execute "install neo4j sources #{node['neo4j']['server_file']}" do
@@ -102,41 +106,6 @@ end
 
 link "/etc/init.d/neo4j-service" do
   to "#{node['neo4j']['server_bin']}/neo4j"
-end
-
-template "#{node['neo4j']['server_etc']}/logging.properties" do
-  source "logging.properties.erb"
-  owner "root"
-  group "root"
-  mode 0444
-end
-
-template "#{node['neo4j']['server_etc']}/neo4j-http-logging.xml" do
-  source "neo4j-http-logging.xml.erb"
-  owner "root"
-  group "root"
-  mode 0444
-end
-
-template "#{node['neo4j']['server_etc']}/neo4j.properties" do
-  source "neo4j.properties.erb"
-  owner "root"
-  group "root"
-  mode 0444
-end
-
-template "#{node['neo4j']['server_etc']}/neo4j-server.properties" do
-  source "neo4j-server.properties.erb"
-  owner "root"
-  group "root"
-  mode 0444
-end
-
-template "#{node['neo4j']['server_etc']}/neo4j-wrapper.conf" do
-  source "neo4j-wrapper.conf.erb"
-  owner "root"
-  group "root"
-  mode 0444
 end
 
 execute "setting the systems ulimits" do 

@@ -39,6 +39,7 @@ unless FileTest.exists?("#{node['neo4j']['server_bin']}/neo4j")
     command <<-EOF
       tar -zxf #{node['neo4j']['server_file']['enterprise']}
       chown -R root:root neo4j-enterprise-#{node['neo4j']['server_version']}
+      rm -rf #{node['neo4j']['server_path']}
       mv -f neo4j-enterprise-#{node['neo4j']['server_version']} #{node['neo4j']['server_path']}
     EOF
     action :run

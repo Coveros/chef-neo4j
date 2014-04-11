@@ -80,10 +80,14 @@ unless FileTest.exists?("#{node['neo4j']['server_bin']}/neo4j")
     command <<-EOF
       tar -zxf #{node['neo4j']['server_file']['enterprise']}
       chown -R root:root neo4j-enterprise-#{node['neo4j']['server_version']}
-      cd neo4j-enterprise-#{node['neo4j']['server_version']}
+      mv neo4j-enterprise-#{node['neo4j']['server_version']} #{['neo4j']['server_path']}
     EOF
     action :run
   end
+end
+
+link "/etc/init.d/neo4j-service" do
+  to "#{node['neo4j']['server_bin']}/neo4j"
 end
 
 execute "setting the systems ulimits" do 

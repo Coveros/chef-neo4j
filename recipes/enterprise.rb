@@ -27,7 +27,12 @@ end
 
 include_recipe "java"
 
-unless FileTest.exists?("#{node['neo4j']['server_bin']}/neo4j")
+#stop our service
+service "neo4j-service" do
+  action :stop
+end
+
+#unless FileTest.exists?("#{node['neo4j']['server_bin']}/neo4j")
   remote_file "#{Chef::Config[:file_cache_path]}/#{node['neo4j']['server_file']['enterprise']}" do
     source node['neo4j']['server_download']['enterprise']
   end
@@ -39,15 +44,24 @@ unless FileTest.exists?("#{node['neo4j']['server_bin']}/neo4j")
     command <<-EOF
       tar -zxf #{node['neo4j']['server_file']['enterprise']}
       chown -R root:root neo4j-enterprise-#{node['neo4j']['server_version']}
-      rm -rf #{node['neo4j']['server_path']}
-      mv -f neo4j-enterprise-#{node['neo4j']['server_version']} #{node['neo4j']['server_path']}
+      if [ -d "/data/app/neo4j/data" ]; then rm -rf neo4j-enterprise-#{node['neo4j']['server_version']}/data; fi
+      mkdir -p #{node['neo4j']['server_path']}
+      cp -rp neo4j-enterprise-#{node['neo4j']['server_version']}/* #{node['neo4j']['server_path']}/
+      rm -rf neo4j-enterprise-#{node['neo4j']['server_version']}
     EOF
     action :run
   end
-end
+#end
 
 link "/etc/init.d/neo4j-service" do
   to "#{node['neo4j']['server_path']}/bin/neo4j"
+end
+
+#allow us to upgrade from an older database
+file_replace_line "neo4j.properties" do
+  replace "#allow_store_upgrade=true"
+  with    "allow_store_upgrade=true"
+  path "#{node['neo4j']['server_path']}/conf/neo4j.properties"
 end
 
 execute "setting the systems ulimits" do 

@@ -6,7 +6,7 @@ long_description  IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version           "0.0.1"
 recipe            "neo4j", "Installs and configures neo4j"
 
-%w{apt yum java}.each do |pkg|
+%w{apt yum java file}.each do |pkg|
   depends pkg
 end
 

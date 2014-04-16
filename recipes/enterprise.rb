@@ -32,27 +32,43 @@ service "neo4j-service" do
   action :stop
 end
 
-#unless FileTest.exists?("#{node['neo4j']['server_bin']}/neo4j")
-  remote_file "#{Chef::Config[:file_cache_path]}/#{node['neo4j']['server_file']['enterprise']}" do
-    source node['neo4j']['server_download']['enterprise']
-  end
+remote_file "#{Chef::Config[:file_cache_path]}/#{node['neo4j']['server_file']['enterprise']}" do
+  source node['neo4j']['server_download']['enterprise']
+end
 
-  execute "install neo4j sources #{node['neo4j']['server_file']['enterprise']}" do
-    user "root"
-    group "root"
-    cwd Chef::Config[:file_cache_path]
-    command <<-EOF
-      tar -zxf #{node['neo4j']['server_file']['enterprise']}
-      chown -R root:root neo4j-enterprise-#{node['neo4j']['server_version']}
-      if [ -d "/data/app/neo4j/data" ]; then rm -rf neo4j-enterprise-#{node['neo4j']['server_version']}/data; fi
-      mkdir -p #{node['neo4j']['server_path']}
-      cp -rp neo4j-enterprise-#{node['neo4j']['server_version']}/* #{node['neo4j']['server_path']}/
-      rm -rf neo4j-enterprise-#{node['neo4j']['server_version']}
-    EOF
-    action :run
-  end
+execute "install neo4j sources #{node['neo4j']['server_file']['enterprise']}" do
+  user "root"
+  group "root"
+  cwd Chef::Config[:file_cache_path]
+  command <<-EOF
+    tar -zxf #{node['neo4j']['server_file']['enterprise']}
+    chown -R root:root neo4j-enterprise-#{node['neo4j']['server_version']}
+    if [ -d "/data/app/neo4j/data" ]; then rm -rf neo4j-enterprise-#{node['neo4j']['server_version']}/data; fi
+    mkdir -p #{node['neo4j']['server_path']}
+    cp -rp neo4j-enterprise-#{node['neo4j']['server_version']}/* #{node['neo4j']['server_path']}/
+    rm -rf neo4j-enterprise-#{node['neo4j']['server_version']}
+  EOF
+  action :run
+end
+
+#fix our directory structure
+execute "Set permissions on #{node['neo4j']['server_path']}" do
+  user "root"
+  group "root"
+  command <<-EOF
+    chown -R #{node['neo4j']['server_user']}.#{node['neo4j']['server_group']} #{node['neo4j']['server_path']}
+    chmod -R 744 #{node['neo4j']['server_path']}
+  EOF
+  action :run
+end
+#directory "Set permissions on #{node['neo4j']['server_path']}" do
+#  path "#{node['neo4j']['server_path']}"
+#  owner "#{node['neo4j']['server_user']}"
+#  group "#{node['neo4j']['server_group']}"
+#  recursive true
+#  mode 00744
 #end
-
+    
 link "/etc/init.d/neo4j-service" do
   to "#{node['neo4j']['server_path']}/bin/neo4j"
 end
@@ -62,6 +78,13 @@ file_replace_line "neo4j.properties" do
   replace "#allow_store_upgrade=true"
   with    "allow_store_upgrade=true"
   path "#{node['neo4j']['server_path']}/conf/neo4j.properties"
+end
+
+#run services as dmps
+file_replace_line "neo4j" do
+  replace "DEFAULT_USER='neo4j'"
+  with    "DEFAULT_USER='#{node['neo4j']['server_user']}'"
+  path "#{node['neo4j']['server_path']}/bin/neo4j"
 end
 
 execute "setting the systems ulimits" do 

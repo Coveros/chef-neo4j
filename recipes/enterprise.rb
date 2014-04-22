@@ -61,13 +61,6 @@ execute "Set permissions on #{node['neo4j']['server_path']}" do
   EOF
   action :run
 end
-#directory "Set permissions on #{node['neo4j']['server_path']}" do
-#  path "#{node['neo4j']['server_path']}"
-#  owner "#{node['neo4j']['server_user']}"
-#  group "#{node['neo4j']['server_group']}"
-#  recursive true
-#  mode 00744
-#end
     
 link "/etc/init.d/neo4j-service" do
   to "#{node['neo4j']['server_path']}/bin/neo4j"

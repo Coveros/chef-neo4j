@@ -43,9 +43,11 @@ execute "install neo4j sources #{node['neo4j']['server_file']['enterprise']}" do
   command <<-EOF
     tar -zxf #{node['neo4j']['server_file']['enterprise']}
     chown -R root:root neo4j-enterprise-#{node['neo4j']['server_version']}
-    if [ -d "/data/app/neo4j/data" ]; then rm -rf neo4j-enterprise-#{node['neo4j']['server_version']}/data; fi
+    if [ -d "#{node['neo4j']['server_path']}/data" ]; then cp -r "#{node['neo4j']['server_path']}/data" /tmp/; fi
+    if [ -d "#{node['neo4j']['server_path']}" ]; then rm -rf "#{node['neo4j']['server_path']}"; fi
     mkdir -p #{node['neo4j']['server_path']}
     cp -rp neo4j-enterprise-#{node['neo4j']['server_version']}/* #{node['neo4j']['server_path']}/
+    if [ -d "/tmp/data" ]; then cp -r /tmp/data "#{node['neo4j']['server_path']}/"; fi
     rm -rf neo4j-enterprise-#{node['neo4j']['server_version']}
   EOF
   action :run

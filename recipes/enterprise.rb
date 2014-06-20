@@ -47,7 +47,7 @@ execute "install neo4j sources #{node['neo4j']['server_file']['enterprise']}" do
     if [ -d "#{node['neo4j']['server_path']}" ]; then rm -rf "#{node['neo4j']['server_path']}"; fi
     mkdir -p #{node['neo4j']['server_path']}
     cp -rp neo4j-enterprise-#{node['neo4j']['server_version']}/* #{node['neo4j']['server_path']}/
-    if [ -d "/tmp/data" ]; then cp -r /tmp/data "#{node['neo4j']['server_path']}/"; fi
+    if [ -d "/tmp/data" ]; then cp -r /tmp/data "#{node['neo4j']['server_path']}/"; rm -r /tmp/data fi
     rm -rf neo4j-enterprise-#{node['neo4j']['server_version']}
   EOF
   action :run
